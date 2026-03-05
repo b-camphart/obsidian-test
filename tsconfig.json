@@ -1,0 +1,22 @@
+{
+	"$schema": "https://www.schemastore.org/tsconfig.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"declaration": true,
+		"skipLibCheck": true,
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"rewriteRelativeImportExtensions": true,
+		"verbatimModuleSyntax": true,
+		"erasableSyntaxOnly": true
+	},
+	"include": [
+		"src/**/*.ts"
+	],
+	"exclude": [
+		"**/node_modules/**",
+		"src/**/*.test.ts"
+	]
+}

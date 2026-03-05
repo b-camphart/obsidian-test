@@ -1,0 +1,44 @@
+{
+	"$schema": "https://www.schemastore.org/package.json",
+	"name": "obsidian-test",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/b-camphart/obsidian-test"
+	},
+	"description": "Test your plugins within obsidian automatically",
+	"version": "0.1.0",
+	"type": "module",
+	"bin": {
+		"obsidian-test": "bin/main.js"
+	},
+	"types": "./dist/suite.d.ts",
+	"exports": {
+		".": "./dist/suite.js",
+		"./node": "./dist/node/index.js"
+	},
+	"files": [
+		"bin",
+		"dist"
+	],
+	"scripts": {
+		"compile": "tsc",
+		"build:clean": "rm -rf ./dist",
+		"build": "pnpm build:clean && pnpm compile",
+		"test": "pnpm build && tsx --test \"./src/**/*.test.ts\""
+	},
+	"packageManager": "pnpm@10.5.2+sha512.da9dc28cd3ff40d0592188235ab25d3202add8a207afbedc682220e4a0029ffbff4562102b9e6e46b4e3f9e8bd53e6d05de48544b0c57d4b0179e22c76d1199b",
+	"dependencies": {
+		"commander": "^14.0.3",
+		"obsidian": "latest",
+		"source-map": "^0.7.6",
+		"tree-kill": "^1.2.2",
+		"vite": "^7.3.1"
+	},
+	"peerDependencies": {
+		"obsidian": "^1.12.3"
+	},
+	"devDependencies": {
+		"tsx": "^4.21.0"
+	}
+}
