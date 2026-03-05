@@ -4,7 +4,7 @@
 
 Run automated tests for your **Obsidian plugins inside Obsidian itself**.
 
-`obsidian-test` launches a real Obsidian instance with your plugin installed in a temporary vault, runs your tests inside the application, collects the results, and exits with a proper CI-friendly status code.
+`obsidian-test` launches a real Obsidian instance with a test runner plugin installed in a temporary vault, runs your tests inside the application, collects the results, and exits with a proper CI-friendly status code.
 
 This makes it possible to test **actual plugin behavior inside the real Obsidian runtime**, not just mocks.
 
