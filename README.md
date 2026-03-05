@@ -1,5 +1,7 @@
 # obsidian-test
 
+#### ⚠️ Beta software — APIs and behavior may change
+
 Run automated tests for your **Obsidian plugins inside Obsidian itself**.
 
 `obsidian-test` launches a real Obsidian instance with your plugin installed in a temporary vault, runs your tests inside the application, collects the results, and exits with a proper CI-friendly status code.
