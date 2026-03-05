@@ -40,7 +40,7 @@ export async function buildTestArtifact({
 			write: outputDirPath !== null,
 			outDir: outputDirPath ?? undefined,
 			rollupOptions: {
-				external: ['obsidian', 'electron', ...builtinModules],
+				external: ['obsidian', 'electron', "node:test", "node:test/reporters", ...builtinModules],
 				treeshake: false,
 			},
 		},
