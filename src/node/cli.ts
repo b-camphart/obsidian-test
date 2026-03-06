@@ -5,6 +5,7 @@ import run, { type TestConfig } from "./run.js";
 import path from "node:path";
 import { standardTestVaultPath } from "./obsidian.js";
 import { resolveConfig } from "./config.ts";
+import { pathToFileURL } from "node:url";
 
 program
 	.option(
@@ -57,7 +58,7 @@ let config: TestConfig = {
 };
 
 if (options.setup) {
-	await import(path.join(process.cwd(), options.setup));
+	await import(pathToFileURL(path.join(process.cwd(), options.setup)).href);
 
 	config = await resolveConfig(config);
 }
