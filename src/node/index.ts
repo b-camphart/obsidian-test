@@ -3,6 +3,8 @@ export {
 	forceRunTest,
 } from "./run.js";
 
+export { onConfigResolved } from "./config.ts";
+
 export {
 	buildTestArtifact
 } from "./build.js";
