@@ -1,9 +1,10 @@
 import { program } from "commander";
 
 import { resolvePackageName } from "./npm.js";
-import run from "./run.js";
+import run, { type TestConfig } from "./run.js";
 import path from "node:path";
 import { standardTestVaultPath } from "./obsidian.js";
+import { resolveConfig } from "./config.ts";
 
 program
 	.option(
@@ -30,11 +31,16 @@ program
 		"--force",
 		"Force re-running tests (ignore cache)"
 	)
+	.option(
+		"--setup <path>",
+		"Path, relative to the current working directory, of a script to run as part of the setup",
+		""
+	)
 	.parse(process.argv);
 
 const options = program.opts();
 
-process.exitCode = await run({
+let config: TestConfig = {
 	build: {
 		testPattern: options.testPattern,
 	},
@@ -48,6 +54,14 @@ process.exitCode = await run({
 	},
 	cachePath: options.cachePath,
 	forceRerun: options.force,
-}) ?? undefined;
+};
+
+if (options.setup) {
+	await import(path.join(process.cwd(), options.setup));
+
+	config = await resolveConfig(config);
+}
+
+process.exitCode = await run(config) ?? undefined;
 
 
