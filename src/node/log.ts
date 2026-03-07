@@ -19,7 +19,7 @@ export function standardLog(): Log {
 		_standardLog = {
 			info: (line) => process.stdout.write(line + "\n"),
 			write: (chunk) => process.stdout.write(chunk),
-			error: (line) => process.stderr.write(line),
+			error: (line) => process.stderr.write(line + "\n"),
 		};
 	}
 
@@ -57,7 +57,7 @@ export function testLog(t: TestContext): Log {
 				t.diagnostic(buffer);
 				buffer = "";
 			}
-			t.diagnostic(`[info] ${line}`)
+			t.diagnostic(`${line}`)
 		},
 		error: (line) => {
 			if (buffer !== "") {
