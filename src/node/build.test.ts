@@ -35,7 +35,7 @@ test("Building consumer package", async () => {
 			}
 		})
 
-		const expectedErrorStr = `new Error("Expected error ${randomBytes(16).toString("utf8")}")`;
+		const expectedErrorStr = `new Error("Expected error ${randomBytes(16).toString("hex")}")`;
 		await writeFile(
 			path.join(dirPath, "glob.test.js"),
 			`
@@ -81,7 +81,7 @@ test("Building consumer package", async () => {
 			}
 		})
 
-		const expectedErrorStr = `new Error("Expected error ${randomBytes(16).toString("utf8")}")`;
+		const expectedErrorStr = `new Error("Expected error ${randomBytes(16).toString("hex")}")`;
 		await writeFile(
 			path.join(dirPath, "glob.test.js"),
 			`
