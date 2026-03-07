@@ -34,6 +34,12 @@ test("Resolving config", async (t: TestContext) => {
 		}
 	});
 
+	const obsidianJsonPath = path.join(dirPath, "obsidian.json");
+	await writeFile(
+		obsidianJsonPath,
+		JSON.stringify({ vaults: [] })
+	);
+
 	const vaultPath = path.join(dirPath, "test-vault");
 	await writeFile(
 		path.join(dirPath, "setup.js"),
@@ -46,6 +52,7 @@ test("Resolving config", async (t: TestContext) => {
 					launch: {
 						...config.launch,
 						cmd: "non-existant-program-id",
+						obsidianConfigPath: "${obsidianJsonPath}",
 					}
 				}
 			});
@@ -64,15 +71,18 @@ test("Resolving config", async (t: TestContext) => {
 	);
 
 	const entries = await readdir(vaultPath, { recursive: true });
-
-	t.assert.deepStrictEqual(entries, [
-		".obsidian",
-		".obsidian/community-plugins.json",
-		".obsidian/plugins",
-		".obsidian/plugins/embedded-test-runner",
-		".obsidian/plugins/embedded-test-runner/data.json",
-		".obsidian/plugins/embedded-test-runner/main.js",
-		".obsidian/plugins/embedded-test-runner/manifest.json",
-	]);
+	t.assert.deepStrictEqual(
+		new Set(entries),
+		new Set([
+			".obsidian",
+			".obsidian/community-plugins.json",
+			".obsidian/plugins",
+			".obsidian/plugins/embedded-test-runner",
+			".obsidian/plugins/embedded-test-runner/data.json",
+			".obsidian/plugins/embedded-test-runner/main.js",
+			".obsidian/plugins/embedded-test-runner/manifest.json",
+		]),
+		`expected entries within test vault`
+	);
 
 })
