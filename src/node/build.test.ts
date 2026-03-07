@@ -4,19 +4,13 @@ import { execSync } from "child_process";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 
-import { createTempDependentPackage } from "../test/dependent.js";
+import {
+	cleanNPMEnv,
+	createTempDependentPackage } from "../test/dependent.js";
 import { randomBytes } from "crypto";
 
 function run(cmd: string, cwd: string) {
-	const env = { ...process.env };
-	const envKeys = Object.keys(env);
-	for (const key of envKeys) {
-		if (key.startsWith("npm_package_")) {
-			delete env[key];
-		}
-	}
-
-	return execSync(cmd, { cwd, env, stdio: 'pipe' });
+	return execSync(cmd, { cwd, env: cleanNPMEnv(), stdio: 'pipe' });
 }
 
 

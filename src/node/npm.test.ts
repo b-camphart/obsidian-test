@@ -3,18 +3,11 @@ import test, { type TestContext } from "node:test";
 import { execSync } from "child_process";
 import { writeFile } from "fs/promises";
 import path from "path";
-import { createTempDependentPackage } from "../test/dependent";
+import { cleanNPMEnv,
+createTempDependentPackage } from "../test/dependent";
 
 function run(cmd: string, cwd: string) {
-	const env = { ...process.env };
-	const envKeys = Object.keys(env);
-	for (const key of envKeys) {
-		if (key.startsWith("npm_package_")) {
-			delete env[key];
-		}
-	}
-
-	return execSync(cmd, { cwd, stdio: "pipe", env });
+	return execSync(cmd, { cwd, stdio: "pipe", env: cleanNPMEnv() });
 }
 
 test("resolve package name", async (t: TestContext) => {

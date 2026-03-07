@@ -7,6 +7,19 @@ import {
 	testLog, type Log } from "../node/log.ts";
 import type { TestContext } from "node:test";
 
+export function cleanNPMEnv() {
+	const env = { ...process.env };
+	const envKeys = Object.keys(env);
+	for (const key of envKeys) {
+		if (key.startsWith("npm_package_") ||
+		   key.startsWith("npm_config_")) {
+			delete env[key];
+		}
+	}
+
+	return env;
+}
+
 /** 
  * Creates a temporary directory somewhere on the filesystem with a package.json file.  Installs "obsidian-test" as a 
  * dependency, and cleans the directory at the end of the test.
@@ -39,15 +52,7 @@ export async function createTempDependentPackage({
 		JSON.stringify(packageJSON, null, 2)
 	);
 
-	const env = { ...process.env };
-	const envKeys = Object.keys(env);
-	for (const key of envKeys) {
-		if (key.startsWith("npm_package_")) {
-			delete env[key];
-		}
-	}
-
-	const output = execSync(`npm install ${root}`, { cwd: dirPath, env, stdio: 'pipe' });
+	const output = execSync(`npm install ${root}`, { cwd: dirPath, env: cleanNPMEnv(), stdio: 'pipe' });
 	if (log !== null) {
 		const childLog = subLog({ parent: log, prefix: '[npm install]' })
 		output.toString().split("\n").forEach(line => childLog.info(line));
