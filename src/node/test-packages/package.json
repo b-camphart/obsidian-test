@@ -1,8 +1,0 @@
-{
-	"scripts": {
-		"check": "node ./check.js"
-	},
-	"dependencies": {
-		"obsidian-test": "file:../../../../obsidian-test"
-	}
-}

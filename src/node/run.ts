@@ -2,7 +2,7 @@ import fs, { mkdir } from "fs/promises";
 import crypto from "crypto";
 import {
 	type LaunchConfig,
-	type MakeManifestInput, runObsidianUntil, standardTestVaultPath } from "./obsidian.js";
+	type MakeManifestInput, type ObsidianPluginConfig, runObsidianUntil, standardTestVaultPath } from "./obsidian.js";
 import { buildTestArtifact, type BuildTestArtifactConfig } from "./build.js";
 import path from "path";
 import { createServer } from "net";
@@ -18,6 +18,8 @@ interface RunConfig {
 	build?: BuildTestArtifactConfig;
 	/** customize the manifest used for the test runner plugin that will be used in obsidian */
 	manifest?: MakeManifestInput;
+	/** additional plugins to install in the test vault */
+	plugins?: Array<ObsidianPluginConfig>;
 	/** absolute path to a directory where the logs, exit code, and hash will be written */
 	log?: Log;
 	/** timeout in milliseconds, after which the test will be forced to end with an error */
@@ -44,6 +46,7 @@ export async function runTest(params: TestConfig = {}) {
 		manifest = {
 			id: "embedded-test-runner",
 		},
+		plugins,
 		cachePath = path.join(process.cwd(), ".obsidian-test"),
 		log = standardLog(),
 		forceRerun: forceReplay = false,
@@ -81,6 +84,7 @@ export async function runTest(params: TestConfig = {}) {
 			manifest,
 			artifact,
 		},
+		plugins,
 		log,
 		internalLogWriter: {
 			write(chunk: string) {
@@ -200,6 +204,7 @@ export async function forceRunTest({
 	manifest = {
 		id: "embedded-test-runner",
 	},
+	plugins,
 	log = standardLog(),
 	timeoutMS,
 
@@ -212,6 +217,7 @@ export async function forceRunTest({
 			manifest,
 			artifact: await buildTestArtifact(build),
 		},
+		plugins,
 		log,
 		internalLogWriter: log,
 		timeoutMS,
@@ -318,6 +324,7 @@ async function createTestRunnerLogServer() {
  */
 async function runObsidianTest({
 	launch,
+	plugins = [],
 	testPlugin,
 	log,
 	internalLogWriter,
@@ -326,6 +333,7 @@ async function runObsidianTest({
 	fileSystem,
 }: {
 	launch?: LaunchConfig;
+	plugins?: Array<ObsidianPluginConfig>;
 	testPlugin: {
 		manifest: MakeManifestInput;
 		artifact: {
@@ -350,6 +358,7 @@ async function runObsidianTest({
 			fileSystem,
 			launch,
 			plugins: [
+				...plugins,
 				{
 					...testPlugin,
 					data: {
