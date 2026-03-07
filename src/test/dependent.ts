@@ -26,7 +26,7 @@ export async function createTempDependentPackage({
 		version?: string;
 		description?: string;
 		author?: string;
-	}
+	} & Record<string, unknown>;
 }): Promise<string> {
 	const root: string = process.cwd();
 
