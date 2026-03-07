@@ -341,7 +341,7 @@ export async function prepareObsidianPlugin({
 type BasicSubProcess = { pid?: number; kill(): void; };
 async function launchObsidianInVaultPath<SubProcess extends BasicSubProcess>({
 	vaultPath,
-	cmd,
+	cmd = "obsidian",
 	obsidianConfigPath,
 	os,
 	fileSystem,
@@ -351,6 +351,8 @@ async function launchObsidianInVaultPath<SubProcess extends BasicSubProcess>({
 	},
 	fileSystem?: Parameters<typeof addVault>[0]["fileSystem"]
 }): Promise<{
+	/** the command used to launch obsidian */
+	cmd: string;
 	/** @param signal `SIGTERM` by default */
 	kill(signal?: string | number): Promise<void>;
 	subProcess: SubProcess;
@@ -377,6 +379,7 @@ async function launchObsidianInVaultPath<SubProcess extends BasicSubProcess>({
 	}
 
 	return {
+		cmd,
 		kill,
 		subProcess,
 	}
@@ -570,11 +573,17 @@ export async function runObsidianUntil<T>({
 
 	subProcess.on("exit", (code) => {
 		if (!controller.signal.aborted) {
-			controller.abort(
-				`Obsidian exited unexpectedly` + (code === null
-					? ""
-					: ` with ${code}`),
-			);
+			if (code === 127) {
+				controller.abort(
+					`Exit code ${code}, "${launched.cmd}" not found`
+				)
+			} else {
+				controller.abort(
+					`Obsidian exited unexpectedly` + (code === null
+						? ""
+						: ` with ${code}`),
+				);
+			}
 			log.error(controller.signal.reason);
 		}
 		controller.abort();
