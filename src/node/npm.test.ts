@@ -1,9 +1,9 @@
 import test, { type TestContext } from "node:test";
 
 import { execSync } from "child_process";
-import { mkdtemp, rm, writeFile } from "fs/promises";
-import { tmpdir } from "os";
+import { writeFile } from "fs/promises";
 import path from "path";
+import { createTempDependentPackage } from "../test/dependent";
 
 function run(cmd: string, cwd: string) {
 	const env = { ...process.env };
@@ -18,20 +18,12 @@ function run(cmd: string, cwd: string) {
 }
 
 test("resolve package name", async (t: TestContext) => {
-	const root = process.cwd();
-	t.assert.ok(root.endsWith("obsidian-test"));
-
-	const dirPath = await mkdtemp(path.join(tmpdir(), "obsidian-test-consumer-"))
-	t.after(() => rm(dirPath, { recursive: true }));
-	t.diagnostic(`Created test dir at ${dirPath}`)
-
 	const consumerName = "consumer-test"
-	await writeFile(
-		path.join(dirPath, "package.json"),
-		JSON.stringify({ name: consumerName }, null, 2)
-	);
-
-	run(`npm install ${root}`, dirPath);
+	const dirPath = await createTempDependentPackage({
+		t, packageJSON: {
+			name: consumerName,
+		}
+	});
 
 	await writeFile(
 		path.join(dirPath, "index.js"),
@@ -50,20 +42,12 @@ test("resolve package name", async (t: TestContext) => {
 })
 
 test("resolve package version", async (t: TestContext) => {
-	const root = process.cwd();
-	t.assert.ok(root.endsWith("obsidian-test"));
-
-	const dirPath = await mkdtemp(path.join(tmpdir(), "obsidian-test-consumer-"))
-	t.after(() => rm(dirPath, { recursive: true }));
-	t.diagnostic(`Created test dir at ${dirPath}`)
-
 	const consumerVersion = "1.5.3"
-	await writeFile(
-		path.join(dirPath, "package.json"),
-		JSON.stringify({ version: consumerVersion }, null, 2)
-	);
-
-	run(`npm install ${root}`, dirPath);
+	const dirPath = await createTempDependentPackage({
+		t, packageJSON: {
+			version: consumerVersion
+		}
+	});
 
 	await writeFile(
 		path.join(dirPath, "index.js"),
