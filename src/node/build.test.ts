@@ -15,97 +15,61 @@ function run(cmd: string, cwd: string) {
 
 
 test("Building consumer package", async () => {
+	const requireInclude = (source: string, ...members: string[]) => `const { ${members.join(", ")} } = require("${source}");`;
+	const importInclude = (source: string, ...members: string[]) => `import { ${members.join(", ")} } from "${source}";`;
 
-	// we do not support cjs NODE code, however
+	const supportedClientCode = [
+		{ ext: "cjs", includePattern: requireInclude, moduleType: "commonjs" as const },
+		{ ext: "mjs", includePattern: importInclude, moduleType: "module" as const },
+		{ ext: "ts", includePattern: importInclude, moduleType: "module" as const },
+	];
 
-	await test(`cjs plugin code`, async (t: TestContext) => {
-		const dirPath = await createTempDependentPackage({
-			t, packageJSON: {
-				type: "commonjs",
-				name: "obsidian-test-consumer",
-				version: "1.5.3",
-				description: "tests obsidian-test from the consumer side",
-				author: "me",
+	for (const { ext: clientExt, includePattern: clientImportPattern, moduleType } of supportedClientCode) {
+
+		await test(`Run  against ${clientExt}`, async (t: TestContext) => {
+			const dirPath = await createTempDependentPackage({
+				t, packageJSON: {
+					type: moduleType,
+					name: "obsidian-test-consumer",
+					version: "1.5.3",
+					description: "tests obsidian-test from the consumer side",
+					author: "me",
+				}
+			})
+
+			const expectedErrorStr = `new Error("Expected error ${randomBytes(16).toString("hex")}")`;
+			await writeFile(
+				path.join(dirPath, "glob.test." + clientExt),
+				`
+					${clientImportPattern("obsidian-test", "embedded")}
+					embedded((app) => {
+						throw ${expectedErrorStr};
+					})
+					`
+			);
+
+			const expectedArtifactPath = path.join(dirPath, "artifact.js");
+			await writeFile(
+				path.join(dirPath, "index.mjs"),
+				`
+					${importInclude("obsidian-test/node", "buildTestArtifact")}
+					${importInclude("fs", "writeFileSync")}
+					const artifact = await buildTestArtifact({
+						testPattern: "./*.test.${clientExt}"
+					});
+					writeFileSync("${expectedArtifactPath}", artifact.code, "utf8");
+					`
+			);
+
+			const output = run("node index.mjs", dirPath);
+			const artifact = await readFile(expectedArtifactPath, "utf8");
+			if (!artifact.includes(expectedErrorStr)) {
+				output.toString("utf8").split("\n").forEach(t.diagnostic.bind(t));
+				throw new Error(`buildTestArtifact did not include glob file` +
+					`\nExpected build output to include "${expectedErrorStr}"` +
+					`\nArtifact::\n${artifact}\nEOF`);
 			}
 		})
 
-		const expectedErrorStr = `new Error("Expected error ${randomBytes(16).toString("hex")}")`;
-		await writeFile(
-			path.join(dirPath, "glob.test.js"),
-			`
-			const { embedded } = require("obsidian-test");
-			embedded((app) => {
-				throw ${expectedErrorStr};
-			})
-			`
-		);
-
-		const expectedArtifactPath = path.join(dirPath, "artifact.js");
-		await writeFile(
-			path.join(dirPath, "index.mjs"),
-			`
-			import { buildTestArtifact } from "obsidian-test/node";
-			import { writeFileSync } from "fs";
-			const artifact = await buildTestArtifact({
-				testPattern: "./*.test.js"
-			});
-			writeFileSync("${expectedArtifactPath}", artifact.code, "utf8");
-			`
-		);
-
-		const output = run("node index.mjs", dirPath);
-		const artifact = await readFile(expectedArtifactPath, "utf8");
-		if (!artifact.includes(expectedErrorStr)) {
-			t.diagnostic(output.toString("utf8"));
-			throw new Error(`buildTestArtifact did not include glob file` +
-				`\nExpected build output to include "${expectedErrorStr}"` +
-				`\nArtifact::\n${artifact}\nEOF`);
-		}
-
-	});
-
-	await test(`esm plugin code`, async (t: TestContext) => {
-		const dirPath = await createTempDependentPackage({
-			t, packageJSON: {
-				type: "module",
-				name: "obsidian-test-consumer",
-				version: "1.5.3",
-				description: "tests obsidian-test from the consumer side",
-				author: "me",
-			}
-		})
-
-		const expectedErrorStr = `new Error("Expected error ${randomBytes(16).toString("hex")}")`;
-		await writeFile(
-			path.join(dirPath, "glob.test.js"),
-			`
-			import { embedded } from "obsidian-test";
-			embedded((app) => {
-				throw ${expectedErrorStr};
-			})
-			`
-		);
-
-		const expectedArtifactPath = path.join(dirPath, "artifact.js");
-		await writeFile(
-			path.join(dirPath, "index.js"),
-			`
-			import { buildTestArtifact } from "obsidian-test/node";
-			import { writeFileSync } from "fs";
-			const artifact = await buildTestArtifact({
-				testPattern: "./*.test.js"
-			});
-			writeFileSync("${expectedArtifactPath}", artifact.code, "utf8");
-			`
-		);
-
-		const output = run("node index.js", dirPath);
-		const artifact = await readFile(expectedArtifactPath, "utf8");
-		if (!artifact.includes(expectedErrorStr)) {
-			t.diagnostic(output.toString("utf8"));
-			throw new Error(`buildTestArtifact did not include glob file` +
-				`\nExpected build output to include "${expectedErrorStr}"` +
-				`\nArtifact::\n${artifact}\nEOF`);
-		}
-	})
+	}
 })
