@@ -24,7 +24,7 @@
 		"compile": "tsc",
 		"build:clean": "rm -rf ./dist",
 		"build": "pnpm build:clean && pnpm compile",
-		"test": "tsx --test",
+		"test": "tsx --test ./src/**/*.test.ts",
 		"test:dev": "pnpm build && pnpm test",
 		"prepublishOnly": "pnpm build"
 	},
