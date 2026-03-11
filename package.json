@@ -7,7 +7,6 @@
 		"url": "https://github.com/b-camphart/obsidian-test"
 	},
 	"description": "Test your plugins within obsidian automatically",
-	"version": "0.1.1",
 	"type": "module",
 	"bin": {
 		"obsidian-test": "bin/main.js"
