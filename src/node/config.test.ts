@@ -60,7 +60,7 @@ test("Resolving config", async (t: TestContext) => {
 	t.assert.throws(
 		() => run("npm run test", dirPath),
 		{
-			message: /^Command failed: npm run test\n\[Obsidian Process\] Exit code 127, "non-existant-program-id" not found/
+			message: /^Command failed: npm run test[\s\S]*\[Obsidian Process\] Exit code 127, \"non-existant-program-id\" not found/
 		}
 	);
 
