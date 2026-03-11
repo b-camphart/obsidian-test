@@ -30,5 +30,7 @@ jobs:
         cache: 'pnpm'
     - name: Install dependencies
       run: pnpm install
+    - name: Compile  # no need for clean build when first run
+      run: pnpm compile 
     - name: Run tests
       run: pnpm test
