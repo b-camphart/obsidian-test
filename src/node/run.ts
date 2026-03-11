@@ -302,7 +302,12 @@ async function createTestRunnerLogServer() {
 		address: () => address,
 		connection(timeoutMS: number = 5000) {
 			if (connectionPromise === null) {
-				connectionPromise = Promise.withResolvers();
+				if (Promise.withResolvers) {
+					connectionPromise = Promise.withResolvers();
+				} else {
+					connectionPromise = withResolversMixin();
+				}
+
 				const timeout = setTimeout(
 					connectionPromise.reject.bind(
 						connectionPromise,
@@ -317,6 +322,20 @@ async function createTestRunnerLogServer() {
 			return connectionPromise.promise;
 		},
 	};
+}
+
+function withResolversMixin<T>(): PromiseWithResolvers<T> {
+	let resolve: PromiseWithResolvers<T>["resolve"];
+	let reject: PromiseWithResolvers<T>["reject"];
+	const promise = new Promise<T>((...args) => {
+		resolve = args[0];
+		reject = args[1]
+	});
+	return {
+		promise,
+		resolve: resolve!,
+		reject: reject!,
+	}
 }
 
 /**
