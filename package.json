@@ -22,7 +22,7 @@
 	],
 	"scripts": {
 		"compile": "tsc",
-		"build:clean": "rm -rf ./dist",
+		"build:clean": "tsx ./scripts/build-clean.ts",
 		"build": "pnpm build:clean && pnpm compile",
 		"test": "tsx --test ./src/**/*.test.ts",
 		"test:dev": "pnpm build && pnpm test",
